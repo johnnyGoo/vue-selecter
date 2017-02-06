@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>vue-selector</title>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+</head>
+<style>
+    .box {
+        width: 50px;
+        height: 60px;
+        background-color: #0086b3;
+        border: 0px;
+        font-size: 30px;color: #fff;
+    }
+
+</style>
+<body>
+
+<vue-selector :only-external="false" :mid-effect="{scale: 1.5, distance: 100,rotateX:0,rotateY:50,perspective:300}" @update="onUpdate" type="x" style="background: #eff1f5;height:300px" :active.sync="active"
+         :scale="1"
+         :node-size="{width:50,height:60,spacing:40}">
+    <div @click="click(i)" v-for="i in 5" class="box">i</div>
+</vue-selector>
+<script src="dist/vue.min.js"></script>
+<script src="dist/smart.min.js"></script>
+<script src="dist/vue-selector.js"></script>
+
+<script>
+
+    Smart.Css.smartCss(document.querySelector('body'), {scale: '1'});
+    // Smart.Css.smartCss(document.querySelector('.blur'),{filter:'blur(10px);',width:'100%'});
+    new Vue({
+        el: 'body',
+        components: {
+            VueSelector: VueSelector
+        },
+        data: {
+            playing: true,
+            page: 1, show: false, movies: [{current: 0.5}], active: 0
+        },
+        methods: {
+            onUpdate: function (active) {
+                   console.log(active)
+            },
+            click: function (id) {
+                console.log(id == this.active)
+                if (id == this.active) {
+                } else {
+                    this.active=id;
+                }
+
+            }
+        }
+    })
+
+
+</script>
+</body>
+</html>
