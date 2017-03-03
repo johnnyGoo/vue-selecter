@@ -11,19 +11,19 @@
 </head>
 <style>
     .box {
-        width: 50px;
-        height: 60px;
+        width: 100px;
+        height: 100px;
         background-color: #0086b3;
-        border: 0px;
+        border: 1px solid #ff0000;
         font-size: 30px;color: #fff;
     }
 
 </style>
 <body>
 
-<vue-selector :only-external="false" :mid-effect="{scale: 1.5, distance: 100,rotateX:0,rotateY:50,perspective:300}" @update="onUpdate" type="x" style="background: #eff1f5;height:300px" :active.sync="active"
+<vue-selector :only-external="false" :scale="0.5" :mid-effect="{'z-index':10,y:30,scale: 1.5, distance: 100,rotateX:0,rotateY:50,perspective:300}" @update="onUpdate" type="x" style="background: #eff1f5;height:300px;overflow:hidden" :active.sync="active"
          :scale="1"
-         :node-size="{width:50,height:60,spacing:40}">
+         :node-size="{width:100,height:100,spacing:200}">
     <div @click="click(i)" v-for="i in 5" class="box">i</div>
 </vue-selector>
 <script src="dist/vue.min.js"></script>
@@ -32,7 +32,7 @@
 
 <script>
 
-    Smart.Css.smartCss(document.querySelector('body'), {scale: '1'});
+    Smart.Css.smartCss(document.querySelector('body'), {scale: '0.5'});
     // Smart.Css.smartCss(document.querySelector('.blur'),{filter:'blur(10px);',width:'100%'});
     new Vue({
         el: 'body',
@@ -57,6 +57,9 @@
             }
         }
     })
+
+
+
 
 
 </script>

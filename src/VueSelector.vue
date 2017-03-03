@@ -2,7 +2,7 @@
     <div @touchstart="_onTouchStart"
          @mousedown="_onTouchStart" :style="style" :class="class">
         <slot></slot>
-        <p style="width: 1px;height: 1px;left: 50%;position: absolute;top:50%;background-color: #f00;"></p>
+        <!--<p style="width: 1px;height: 1px;left: 50%;position: absolute;top:50%;background-color: #f00;"></p>-->
     </div>
 </template>
 
@@ -147,7 +147,7 @@
 
 
                 _.each(this.children, function (node, i) {
-                    var x, y, reduce, scale, percent, cssObj, perspectiveCss;
+                    var x, y, reduce, scale, percent, cssObj, perspectiveCss,zindex;
 
                     if (me.type == 'x') {
                         y = (me.info.height - me.nodeSize.height) / 2;
@@ -161,8 +161,24 @@
                         percent = (1 - Math.min(Math.abs(reduce), me.midEffect.distance) / me.midEffect.distance)
                     }
                     scale = percent * (me.midEffect.scale - 1) + 1;
+                    zindex = (percent * (me.midEffect['z-index'] )).toFixed(0) ;
+                    var mx=0,my=0;
 
-                    cssObj = {x: x, y: y, scale: scale};
+                    if(me.midEffect.x){
+                        mx=me.midEffect.x*percent
+                    }
+                    if(me.midEffect.y){
+                        my=me.midEffect.y*percent
+                    }
+                    if(percent<=0){
+                        zindex= -Math.abs(i- me.active);
+                    }
+
+
+
+
+
+                    cssObj = {x: x+mx, y: y+my, scale: scale,'z-index':zindex};
                     perspectiveCss = {};
                     reduce = reduce > 0 ? 1 : -1;
 
@@ -192,13 +208,16 @@
                     var maxx = midx - (this.children.length * (me.nodeSize.width + me.nodeSize.spacing) - me.nodeSize.spacing) + (me.nodeSize.width)
 
 
+
+
                     if (me.value.x > midx) {
                         showID = 0
                     } else if (me.value.x < maxx) {
                         showID = me.children.length - 1
                     } else {
-                        showID = Math.floor((me.value.x - midx - me.nodeSize.width / 2 - me.nodeSize.spacing) / (maxx - midx) * (this.children.length - 1));
+                        showID = Math.floor((me.value.x - midx - me.nodeSize.width / 2 - me.nodeSize.spacing/2) / (maxx - midx) * (this.children.length - 1));
                     }
+//                    console.log(midx+':'+maxx+'    --'+showID)
                     me.active = showID
                     me._showActive();
 
@@ -213,7 +232,7 @@
                     } else if (me.value.y < maxy) {
                         showID = this.children.length - 1
                     } else {
-                        showID = Math.floor((me.value.y - midy - me.nodeSize.height / 2 - me.nodeSize.spacing) / (maxy - midy) * (this.children.length - 1));
+                        showID = Math.floor((me.value.y - midy - me.nodeSize.height / 2 - me.nodeSize.spacing/2) / (maxy - midy) * (this.children.length - 1));
 
                     }
                     me.active = showID
@@ -289,8 +308,8 @@
             });
 
             Css.smartCss(this.$el, {
-                position: 'relative',
-                overflow: 'hidden'
+                position: 'relative'//,
+//                overflow: 'hidden'
             });
             //  this._matchToBound(this.value);
             me._showActive();
