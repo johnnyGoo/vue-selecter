@@ -62,7 +62,12 @@
                     return {scale: 1.25, distance: 100}
                 }
             }
-            , style: {type: String, default: ''}, class: {type: String, default: ''}
+            , style: {type: String, default: ''}
+            , class: {type: String, default: ''}
+            , isDraged: {
+                type: Boolean,
+                default: false
+            }
         },
         data: function () {
             return {
@@ -71,7 +76,8 @@
                 display: false,
                 dragging: false,
                 children: null,
-                info: null, value: {x: 0, y: 0}
+                info: null, value: {x: 0, y: 0},
+                vector: null
             }
 
         },
@@ -127,27 +133,27 @@
                 var midx = this.info.width / 2
                 var midy = this.info.height / 2
                 var min_x = this.info.width / 2 - me.nodeSize.width / 2
-                var max_x =  min_x- (this.children.length * (me.nodeSize.width + me.nodeSize.spacing) - me.nodeSize.spacing)
+                var max_x = min_x - (this.children.length * (me.nodeSize.width + me.nodeSize.spacing) - me.nodeSize.spacing)
                 var min_y = this.info.height / 2 - me.nodeSize.height / 2
                 var max_y = min_y - (this.children.length * (me.nodeSize.height + me.nodeSize.spacing) - me.nodeSize.spacing) + (me.nodeSize.height)
 
                 if (me.type == 'x') {
                     if (v.x > min_x + me.midEffect.distance) {
-                        v.x=min_x + me.midEffect.distance;
-                    }else if(v.x < max_x- me.midEffect.distance){
-                        v.x=max_x - me.midEffect.distance;
+                        v.x = min_x + me.midEffect.distance;
+                    } else if (v.x < max_x - me.midEffect.distance) {
+                        v.x = max_x - me.midEffect.distance;
                     }
                 } else {
                     if (v.y > min_y + me.midEffect.distance) {
-                        v.y=min_y + me.midEffect.distance;
-                    }else if(v.y < max_y- me.midEffect.distance){
-                        v.y=max_y - me.midEffect.distance;
+                        v.y = min_y + me.midEffect.distance;
+                    } else if (v.y < max_y - me.midEffect.distance) {
+                        v.y = max_y - me.midEffect.distance;
                     }
                 }
 
 
                 _.each(this.children, function (node, i) {
-                    var x, y, reduce, scale, percent, cssObj, perspectiveCss,zindex;
+                    var x, y, reduce, scale, percent, cssObj, perspectiveCss, zindex;
 
                     if (me.type == 'x') {
                         y = (me.info.height - me.nodeSize.height) / 2;
@@ -161,24 +167,21 @@
                         percent = (1 - Math.min(Math.abs(reduce), me.midEffect.distance) / me.midEffect.distance)
                     }
                     scale = percent * (me.midEffect.scale - 1) + 1;
-                    zindex = (percent * (me.midEffect['z-index'] )).toFixed(0) ;
-                    var mx=0,my=0;
+                    zindex = (percent * (me.midEffect['z-index'] )).toFixed(0);
+                    var mx = 0, my = 0;
 
-                    if(me.midEffect.x){
-                        mx=me.midEffect.x*percent
+                    if (me.midEffect.x) {
+                        mx = me.midEffect.x * percent
                     }
-                    if(me.midEffect.y){
-                        my=me.midEffect.y*percent
+                    if (me.midEffect.y) {
+                        my = me.midEffect.y * percent
                     }
-                    if(percent<=0){
-                        zindex= -Math.abs(i- me.active);
+                    if (percent <= 0) {
+                        zindex = -Math.abs(i - me.active);
                     }
 
 
-
-
-
-                    cssObj = {x: x+mx, y: y+my, scale: scale,'z-index':zindex};
+                    cssObj = {x: x + mx, y: y + my, scale: scale, 'z-index': zindex};
                     perspectiveCss = {};
                     reduce = reduce > 0 ? 1 : -1;
 
@@ -208,14 +211,12 @@
                     var maxx = midx - (this.children.length * (me.nodeSize.width + me.nodeSize.spacing) - me.nodeSize.spacing) + (me.nodeSize.width)
 
 
-
-
                     if (me.value.x > midx) {
                         showID = 0
                     } else if (me.value.x < maxx) {
                         showID = me.children.length - 1
                     } else {
-                        showID = Math.floor((me.value.x - midx - me.nodeSize.width / 2 - me.nodeSize.spacing/2) / (maxx - midx) * (this.children.length - 1));
+                        showID = Math.floor((me.value.x - midx - me.nodeSize.width / 2 - me.nodeSize.spacing / 2) / (maxx - midx) * (this.children.length - 1));
                     }
 //                    console.log(midx+':'+maxx+'    --'+showID)
                     me.active = showID
@@ -232,7 +233,7 @@
                     } else if (me.value.y < maxy) {
                         showID = this.children.length - 1
                     } else {
-                        showID = Math.floor((me.value.y - midy - me.nodeSize.height / 2 - me.nodeSize.spacing/2) / (maxy - midy) * (this.children.length - 1));
+                        showID = Math.floor((me.value.y - midy - me.nodeSize.height / 2 - me.nodeSize.spacing / 2) / (maxy - midy) * (this.children.length - 1));
 
                     }
                     me.active = showID
@@ -260,6 +261,8 @@
                 this.startPos = this._getTouchPos(e);
                 this.startValue = _.extend({}, this.value);
                 this.dragging = true;
+                this.isDraged = false;
+                this.vector = new Smart.Physics.Vector();
                 document.addEventListener('touchmove', this._onTouchMove, false);
                 document.addEventListener('touchend', this._onTouchEnd, false);
                 document.addEventListener('mousemove', this._onTouchMove, false);
@@ -271,6 +274,13 @@
                 this.value.x = (npos.pageX - this.startPos.pageX) / this.scale + this.startValue.x;
                 this.value.y = (npos.pageY - this.startPos.pageY) / this.scale + this.startValue.y;
                 this._matchToBound(this.value);
+                if (this.isDraged == false) {
+                    this.vector.point = new Smart.Physics.Point(npos.pageX - this.startPos.pageX, npos.pageY - this.startPos.pageY);
+                    if (this.vector.length > 15) {
+                        this.isDraged = true;
+                    }
+                }
+
                 //  this.$emit('update', this.value);
             },
             _onTouchEnd(e) {
